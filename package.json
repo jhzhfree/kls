@@ -1,0 +1,21 @@
+{
+  "name": "kls-knowledge-platform",
+  "version": "1.0.0",
+  "description": "知识库平台 - 文档向量存储检索、知识治理、本地模型训练、知识培训",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm run dev -w server",
+    "dev:client": "npm run dev -w client",
+    "build": "npm run build -w client",
+    "start": "npm run start -w server",
+    "lint": "npm run lint -w server && npm run lint -w client"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

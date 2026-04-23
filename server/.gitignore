@@ -1,0 +1,8 @@
+node_modules/
+dist/
+uploads/
+data/db/*.db
+data/vector/
+logs/
+*.log
+.env
