@@ -9,3 +9,4 @@ logs/
 *.db
 *.sqlite
 .workbuddy/
+.idea/
