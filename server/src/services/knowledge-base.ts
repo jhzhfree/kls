@@ -3,7 +3,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../models/database.js';
-import { logger } from './logger.js';
+import { logger } from '../utils/logger.js';
 import {
   addVectors,
   deleteVectors,
@@ -11,7 +11,7 @@ import {
   searchVectors,
   getCollectionStats,
 } from './vector-store.js';
-import { parseDocument, splitText, isAllowedFile } from './utils/document-parser.js';
+import { parseDocument, splitText, isAllowedFile } from '../utils/document-parser.js';
 import { config } from '../config/index.js';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -85,7 +85,7 @@ export function updateKnowledgeBase(id: string, data: Partial<{
   return getKnowledgeBase(id);
 }
 
-export function deleteKnowledgeBase(id: string) {
+export async function deleteKnowledgeBase(id: string) {
   const db = getDb();
 
   // 删除关联文档的向量
@@ -225,7 +225,7 @@ export function listDocuments(kbId: string) {
   return db.prepare('SELECT * FROM documents WHERE kb_id = ? ORDER BY created_at DESC').all(kbId);
 }
 
-export function deleteDocument(docId: string) {
+export async function deleteDocument(docId: string) {
   const db = getDb();
   const doc = db.prepare('SELECT * FROM documents WHERE id = ?').get(docId) as Record<string, unknown> | undefined;
   if (!doc) throw new Error('文档不存在');
@@ -318,21 +318,21 @@ export async function searchKnowledge(
 export function getKnowledgeBaseStats(kbId: string) {
   const db = getDb();
 
-  const totalChunks = (db.prepare('SELECT COUNT(*) as cnt FROM knowledge_chunks WHERE kb_id = ? AND status = ?').get(kbId, 'active') as { cnt: number }).cnt;
-  const reviewedChunks = (db.prepare('SELECT COUNT(*) as cnt FROM knowledge_chunks WHERE kb_id = ? AND review_status != ?').get(kbId, 'unreviewed') as { cnt: number }).cnt;
-  const flaggedChunks = (db.prepare('SELECT COUNT(*) as cnt FROM knowledge_chunks WHERE kb_id = ? AND quality_score < ?').get(kbId, 0.6) as { cnt: number }).cnt;
-  const totalDocs = (db.prepare('SELECT COUNT(*) as cnt FROM documents WHERE kb_id = ?').get(kbId) as { cnt: number }).cnt;
-  const completedDocs = (db.prepare('SELECT COUNT(*) as cnt FROM documents WHERE kb_id = ? AND status = ?').get(kbId, 'completed') as { cnt: number }).cnt;
-  const errorDocs = (db.prepare('SELECT COUNT(*) as cnt FROM documents WHERE kb_id = ? AND status = ?').get(kbId, 'error') as { cnt: number }).cnt;
-  const totalSearches = (db.prepare('SELECT COUNT(*) as cnt FROM search_logs WHERE kb_id = ?').get(kbId) as { cnt: number }).cnt;
+  const r1 = db.prepare('SELECT COUNT(*) as cnt FROM knowledge_chunks WHERE kb_id = ? AND status = ?').get(kbId, 'active') as { cnt: number } | undefined;
+  const r2 = db.prepare('SELECT COUNT(*) as cnt FROM knowledge_chunks WHERE kb_id = ? AND review_status != ?').get(kbId, 'unreviewed') as { cnt: number } | undefined;
+  const r3 = db.prepare('SELECT COUNT(*) as cnt FROM knowledge_chunks WHERE kb_id = ? AND quality_score < ?').get(kbId, 0.6) as { cnt: number } | undefined;
+  const r4 = db.prepare('SELECT COUNT(*) as cnt FROM documents WHERE kb_id = ?').get(kbId) as { cnt: number } | undefined;
+  const r5 = db.prepare('SELECT COUNT(*) as cnt FROM documents WHERE kb_id = ? AND status = ?').get(kbId, 'completed') as { cnt: number } | undefined;
+  const r6 = db.prepare('SELECT COUNT(*) as cnt FROM documents WHERE kb_id = ? AND status = ?').get(kbId, 'error') as { cnt: number } | undefined;
+  const r7 = db.prepare('SELECT COUNT(*) as cnt FROM search_logs WHERE kb_id = ?').get(kbId) as { cnt: number } | undefined;
 
   return {
-    total_chunks: totalChunks,
-    reviewed_chunks: reviewedChunks,
-    flagged_chunks: flaggedChunks,
-    total_documents: totalDocs,
-    completed_documents: completedDocs,
-    error_documents: errorDocs,
-    total_searches,
+    total_chunks: r1?.cnt || 0,
+    reviewed_chunks: r2?.cnt || 0,
+    flagged_chunks: r3?.cnt || 0,
+    total_documents: r4?.cnt || 0,
+    completed_documents: r5?.cnt || 0,
+    error_documents: r6?.cnt || 0,
+    total_searches: r7?.cnt || 0,
   };
 }

@@ -4,7 +4,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../models/database.js';
-import { logger } from './logger.js';
+import { logger } from '../utils/logger.js';
 import { chat, chatStream, generateOutline, generateQuiz } from './llm-service.js';
 import { searchKnowledge } from './knowledge-base.js';
 

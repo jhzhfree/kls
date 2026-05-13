@@ -4,7 +4,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../models/database.js';
-import { logger } from './logger.js';
+import { logger } from '../utils/logger.js';
 import { config } from '../config/index.js';
 import { chat } from './llm-service.js';
 import fs from 'node:fs';
@@ -31,7 +31,7 @@ export async function listModels(): Promise<string[]> {
 /**
  * 拉取模型
  */
-export async function pullModel(modelName: string): AsyncGenerator<{
+export async function* pullModel(modelName: string): AsyncGenerator<{
   status: string;
   progress: number;
   digest: string;

@@ -4,14 +4,14 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../models/database.js';
-import { logger } from './logger.js';
+import { logger } from '../utils/logger.js';
 import { evaluateKnowledge, chat } from './llm-service.js';
 import {
   deleteVectors,
   updateVectors,
   getCollectionStats,
 } from './vector-store.js';
-import { splitText } from './utils/document-parser.js';
+import { splitText } from '../utils/document-parser.js';
 import { config } from '../config/index.js';
 
 // ============================================================

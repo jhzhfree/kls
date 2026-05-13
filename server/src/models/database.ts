@@ -6,7 +6,7 @@ import Database from 'better-sqlite3';
 import path from 'node:path';
 import fs from 'node:fs';
 import { config } from '../config/index.js';
-import { logger } from './logger.js';
+import { logger } from '../utils/logger.js';
 
 // 确保数据库目录存在
 const dbDir = path.dirname(config.db.path);

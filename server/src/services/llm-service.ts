@@ -2,7 +2,7 @@
  * LLM 服务 - Ollama 本地大模型调用
  */
 import { config } from '../config/index.js';
-import { logger } from './logger.js';
+import { logger } from '../utils/logger.js';
 
 interface ChatMessage {
   role: 'system' | 'user' | 'assistant';

@@ -3,7 +3,7 @@
  */
 import { ChromaClient, Collection, type IEmbeddingFunction } from 'chromadb';
 import { config } from '../config/index.js';
-import { logger } from './logger.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * 自定义 Ollama Embedding 函数
