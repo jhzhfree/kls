@@ -37,7 +37,7 @@
 | 后端 | Express + TypeScript |
 | 数据库 | SQLite (better-sqlite3) |
 | 向量数据库 | ChromaDB |
-| LLM | Ollama (本地部署) |
+| LLM | Ollama（远程部署） |
 | Embedding | nomic-embed-text (Ollama) |
 | Chat | qwen2.5:7b (Ollama) |
 
@@ -78,18 +78,13 @@
 ### 前置依赖
 
 - Node.js >= 18
-- Ollama（本地 LLM 运行环境）
-- ChromaDB（向量数据库）
+- Python >= 3.10（ChromaDB 本地运行）
+- Ollama（远程或本地 LLM 服务）
 
-### 1. 启动基础服务
+### 1. 安装 Python 依赖
 
 ```bash
-# 启动 ChromaDB 和 Ollama
-cd docker
-docker-compose up -d
-
-# 初始化 Ollama 模型
-bash init-ollama.sh
+pip install chromadb
 ```
 
 ### 2. 安装项目依赖
@@ -105,19 +100,25 @@ npm install
 cd server
 cp .env.example .env
 # 根据实际环境修改 .env 中的配置
+# - OLLAMA_HOST: Ollama 服务地址（远程或本地）
+# - CHROMA_HOST/CHROMA_PORT: 默认 localhost:8000
 ```
 
 ### 4. 启动开发服务
 
 ```bash
-# 在项目根目录
-npm run dev
+# 一键启动（ChromaDB + 后端 + 前端）
+npm run dev:full
+
+# 或分别启动
+npm run chroma:start   # ChromaDB 向量数据库 (localhost:8000)
+npm run dev            # 后端 (3000) + 前端 (5173)
 ```
 
 - 前端: http://localhost:5173
 - 后端 API: http://localhost:3000
-- ChromaDB: http://localhost:8000
-- Ollama: http://localhost:11434
+- ChromaDB: http://localhost:8000（本地 Python 运行，数据存储在 `server/data/vector/`）
+- Ollama: 根据 `.env` 中 `OLLAMA_HOST` 配置（默认 `http://192.168.22.6:11434`）
 
 ## API 接口
 
@@ -189,6 +190,9 @@ kls/
 │   │   │   └── llm-service.ts        # LLM 服务
 │   │   ├── utils/            # 工具函数
 │   │   └── index.ts          # 服务入口
+│   ├── data/
+│   │   ├── vector/           # ChromaDB 本地数据
+│   │   └── db/               # SQLite 数据库
 │   └── uploads/              # 上传文件
 │
 ├── client/                    # 前端应用
