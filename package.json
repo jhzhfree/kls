@@ -11,7 +11,7 @@
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "npm run dev -w server",
     "dev:client": "npm run dev -w client",
-    "chroma:start": "chroma run --path ./server/data/vector --host localhost --port 8000",
+    "chroma:start": "\"C:/Users/zhanghe/AppData/Roaming/Python/Python312/Scripts/chroma.exe\" run --path ./server/data/vector --host localhost --port 8000",
     "dev:full": "concurrently \"npm run chroma:start\" \"npm run dev:server\" \"npm run dev:client\"",
     "build": "npm run build -w client",
     "start": "npm run start -w server",
