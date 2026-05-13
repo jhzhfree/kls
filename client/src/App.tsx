@@ -11,18 +11,18 @@ import TrainingDetail from './pages/training/TrainingDetail';
 export default function App() {
   return (
     <BrowserRouter>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/kb" element={<KnowledgeBaseList />} />
-          <Route path="/kb/:id" element={<KnowledgeBaseDetail />} />
-          <Route path="/governance" element={<Governance />} />
-          <Route path="/model-training" element={<ModelTraining />} />
-          <Route path="/training" element={<TrainingList />} />
-          <Route path="/training/:id" element={<TrainingDetail />} />
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="kb" element={<KnowledgeBaseList />} />
+          <Route path="kb/:id" element={<KnowledgeBaseDetail />} />
+          <Route path="governance" element={<Governance />} />
+          <Route path="model-training" element={<ModelTraining />} />
+          <Route path="training" element={<TrainingList />} />
+          <Route path="training/:id" element={<TrainingDetail />} />
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Layout>
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 }

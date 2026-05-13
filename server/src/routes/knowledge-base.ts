@@ -23,6 +23,23 @@ import { success, created, badRequest, notFound, serverError } from '../utils/re
 
 const router = Router();
 
+// 文件名编码修复 - 解决中文文件名乱码问题
+function fixFilename(filename: string): string {
+  if (!filename) return '';
+  try {
+    // 如果文件名包含乱码特征（被当作 Latin-1 编码的 UTF-8）
+    const latin1Buffer = Buffer.from(filename, 'binary');
+    const decoded = latin1Buffer.toString('utf8');
+    // 检查是否包含中文
+    if (/[\u4e00-\u9fa5]/.test(decoded)) {
+      return decoded;
+    }
+    return filename;
+  } catch {
+    return filename;
+  }
+}
+
 // 文件上传配置
 const storage = multer.diskStorage({
   destination: (req, _file, cb) => {
@@ -113,7 +130,9 @@ router.get('/:kbId/documents', (req, res) => {
 router.post('/:kbId/upload', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return badRequest(res, '请选择要上传的文件');
-    const result = await uploadDocument(req.params.kbId, req.file);
+    // 修复中文文件名乱码
+    const originalName = fixFilename(req.file.originalname);
+    const result = await uploadDocument(req.params.kbId, req.file, originalName);
     created(res, result);
   } catch (err) {
     serverError(res, '文档上传失败', err as Error);

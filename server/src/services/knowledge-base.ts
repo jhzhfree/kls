@@ -121,14 +121,16 @@ export async function deleteKnowledgeBase(id: string) {
 export async function uploadDocument(
   kbId: string,
   file: Express.Multer.File,
+  originalName?: string,
 ) {
   const db = getDb();
   const docId = uuidv4();
   const ext = path.extname(file.originalname).replace('.', '');
   const filePath = file.path;
+  const decodedName = originalName || file.originalname;
 
   // 验证文件类型
-  if (!isAllowedFile(file.originalname, config.upload.allowedExtensions)) {
+  if (!isAllowedFile(decodedName, config.upload.allowedExtensions)) {
     fs.unlinkSync(filePath);
     throw new Error(`不支持的文件类型: ${ext}`);
   }
@@ -137,19 +139,19 @@ export async function uploadDocument(
   db.prepare(`
     INSERT INTO documents (id, kb_id, filename, original_name, file_type, file_size, file_path, status)
     VALUES (?, ?, ?, ?, ?, ?, ?, 'processing')
-  `).run(docId, kbId, file.filename, file.originalname, ext, file.size, filePath);
+  `).run(docId, kbId, file.filename, decodedName, ext, file.size, filePath);
 
   // 更新知识库文档数
   db.prepare('UPDATE knowledge_bases SET document_count = document_count + 1, updated_at = datetime(\'now\') WHERE id = ?').run(kbId);
 
-  logger.info(`文档已上传: ${docId} - ${file.originalname}`);
+  logger.info(`文档已上传: ${docId} - ${decodedName}`);
 
   // 异步处理文档（解析 + 分片 + 向量化）
-  processDocumentAsync(docId, kbId, filePath, ext).catch(err => {
+  processDocumentAsync(docId, kbId, filePath, ext, decodedName).catch(err => {
     logger.error(`文档处理失败: ${docId}`, { error: (err as Error).message });
   });
 
-  return { id: docId, original_name: file.originalname, status: 'processing' };
+  return { id: docId, original_name: decodedName, status: 'processing' };
 }
 
 async function processDocumentAsync(
@@ -157,6 +159,7 @@ async function processDocumentAsync(
   kbId: string,
   filePath: string,
   fileType: string,
+  originalName?: string,
 ) {
   const db = getDb();
   try {
@@ -182,7 +185,7 @@ async function processDocumentAsync(
         document_id: docId,
         kb_id: kbId,
         chunk_index: chunk.index,
-        filename: path.basename(filePath),
+        filename: originalName || path.basename(filePath),
       },
     }));
 

@@ -104,7 +104,47 @@ cp .env.example .env
 # - CHROMA_HOST/CHROMA_PORT: 默认 localhost:8000
 ```
 
-### 4. 启动开发服务
+### 4. 启动 ChromaDB 向量数据库
+
+ChromaDB 是项目的向量数据库服务，用于存储和检索文档向量。有以下几种启动方式：
+
+#### 方式一：使用 npm 命令（推荐 Windows）
+
+```bash
+npm run chroma:start
+```
+
+> 注意：此命令依赖 `chroma.exe` 在默认 Python 安装路径。如遇问题，请先安装 ChromaDB：
+> ```bash
+> pip install chromadb
+> # 或确认 Python Scripts 目录在 PATH 中
+> ```
+
+#### 方式二：使用 Python 模块（跨平台）
+
+```bash
+# 设置 CORS 环境变量（允许前端访问）
+$env:CHROMA_SERVER_CORS_ALLOW_ORIGINS = '["http://localhost:3000","http://localhost:5173"]'
+
+# 启动服务（数据存储在 server/data/vector/）
+python -m chromadb --path ./server/data/vector --host localhost --port 8000
+```
+
+#### 方式三：使用 Docker（推荐 Linux/Mac）
+
+```bash
+# 在项目根目录启动 ChromaDB 容器
+docker run -d -p 8000:8000 -v $(pwd)/server/data/vector:/chroma/chroma/.chroma_db chromadb/chroma
+```
+
+#### 方式四：Docker Compose（推荐，可同时启动 Ollama）
+
+```bash
+cd docker
+docker-compose up -d
+```
+
+### 5. 启动开发服务
 
 ```bash
 # 一键启动（ChromaDB + 后端 + 前端）
@@ -115,10 +155,20 @@ npm run chroma:start   # ChromaDB 向量数据库 (localhost:8000)
 npm run dev            # 后端 (3000) + 前端 (5173)
 ```
 
+### 6. 访问服务
+
 - 前端: http://localhost:5173
 - 后端 API: http://localhost:3000
-- ChromaDB: http://localhost:8000（本地 Python 运行，数据存储在 `server/data/vector/`）
+- ChromaDB: http://localhost:8000（数据存储在 `server/data/vector/`）
 - Ollama: 根据 `.env` 中 `OLLAMA_HOST` 配置（默认 `http://192.168.22.6:11434`）
+
+### 7. 验证 ChromaDB 是否正常运行
+
+```bash
+curl http://localhost:8000/api/v2/tenants/default_tenant/databases/default_database
+```
+
+返回 JSON 数据即表示服务正常。
 
 ## API 接口
 
